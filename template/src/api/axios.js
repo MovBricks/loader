@@ -71,7 +71,17 @@ function getAxiosPromiseObject(apiObj) {
       Object.entries(val[1]).forEach((valChild) => {
         if (valChild[0] && valChild[1]) {
           obj[valChild[0]] = (data) => {
-            return service[val[0]](valChild[1], data);
+            if (typeof valChild[1] === 'object' && !Array.isArray(valChild[1])) {
+              if (val[0] === 'get') {
+                return service.get(valChild[1].url, { ...valChild[1].config, params: data });
+              }
+              return service[val[0]](valChild[1].url || '', data, valChild[1].config || {});
+            } else {
+              if (val[0] === 'get') {
+                return service.get(valChild[1], { params: data });
+              }
+              return service[val[0]](valChild[1], data);
+            }
           };
         }
       });
@@ -79,6 +89,7 @@ function getAxiosPromiseObject(apiObj) {
   });
   return obj;
 }
+
 
 export {
   getAxiosPromiseObject,
